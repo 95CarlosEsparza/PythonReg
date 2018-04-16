@@ -7,8 +7,13 @@ import pandas as pd
 import numpy as np
 import sys
 import os
+import statsmodels.formula.api as sm
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn import linear_model
 
-choice = int(input('If this is a CSV file please press [1] to continue. If this is an EXCEl fie press [2]:\n'))
+'''
+choice = int(input('If this is a CSV file please press [1] to continue. If this is an EXCEl file press [2]:\n'))
 
 #for csv files
 if choice == 1:
@@ -30,6 +35,8 @@ if choice == 1:
         writer = pd.ExcelWriter(newfilename)
         df_new.to_excel(writer, index = False)
         writer.save()
+        
+        filename = newfilename
     except:
         print('File not found please try again!')
         sys.exit(1)
@@ -50,10 +57,38 @@ else:
         filename = choice 
     
 print(filename)
+'''
 # Reading in your data file
+
 try:   
-    unRegData = pd.ExcelFile(newfilename)
-    #print(unRegData)
+    filename = "Test.xlsx"
+    #needs specific names right now ONLY works with Run 2 of 3 HC.xlsx
+    Data = pd.read_excel(filename,sheetname="Sorted Data")
+    DashMpg = Data['Dash MPG']
+    MAF = Data['g/s']
+    Speed = Data['mph']
+    
+#    est.summary()
+    
+    #print(DashMpg)
 except:
     print('Error in reading file')
     sys.exit(1)
+
+a_MAF = ([])
+a_MPG = ([])
+a_Speed = ([])
+for k in range(len(DashMpg)):
+    a_MAF.append(MAF[k])
+    a_Speed.append(Speed[k])
+    a_MPG.append(DashMpg[k])
+#print(data)
+
+df = pd.DataFrame({"A": a_MPG, "B": a_Speed, "C": a_MAF})
+result = sm.ols(formula="A ~ B + C", data=df).fit()
+print (result.params)
+
+print (result.summary())
+
+#x, y ,z = zip(*data)
+#plt.plot(x,y,z,'kv')  
