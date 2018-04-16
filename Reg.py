@@ -9,10 +9,10 @@ import sys
 import os
 import statsmodels.formula.api as sm
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn import linear_model
+import re
 
-'''
+#UNCOMMENT NEXT LINE FOR DEBUG
+#'''
 choice = int(input('If this is a CSV file please press [1] to continue. If this is an EXCEl file press [2]:\n'))
 
 #for csv files
@@ -57,7 +57,9 @@ else:
         filename = choice 
     
 print(filename)
-'''
+
+#UNCOMMENT NEXT LINE FOR DEBUG
+#'''
 # Reading in your data file
 
 try:   
@@ -67,6 +69,7 @@ try:
     DashMpg = Data['Dash MPG']
     MAF = Data['g/s']
     Speed = Data['mph']
+    Time = Data['Time']
     
 #    est.summary()
     
@@ -78,17 +81,42 @@ except:
 a_MAF = ([])
 a_MPG = ([])
 a_Speed = ([])
+a_Time = ([])
+
 for k in range(len(DashMpg)):
     a_MAF.append(MAF[k])
     a_Speed.append(Speed[k])
     a_MPG.append(DashMpg[k])
+    a_Time.append(Time[k])
 #print(data)
 
 df = pd.DataFrame({"A": a_MPG, "B": a_Speed, "C": a_MAF})
 result = sm.ols(formula="A ~ B + C", data=df).fit()
-print (result.params)
+
+#for getting the intercepts
+temp_string = ''
+temp_string = temp_string + str(result.params)
 
 print (result.summary())
+#shows the coefficents
+print (re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", temp_string ))
+list = re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", temp_string )
 
-#x, y ,z = zip(*data)
-#plt.plot(x,y,z,'kv')  
+a = float(list[0])
+b = float(list[1])
+c = float(list[2])
+
+#where the data for graphing is stored
+data_out = ([])
+
+#equation for the MPG
+for j in range(len(DashMpg)):
+    data_out.append(a +  (float(b)*float(Speed[j]))  + (float(c)*float(MAF[j])))
+
+#for ploting the data
+plt.plot(a_Time,data_out, 'r-', a_Time, a_MPG)
+plt.xlabel('Time')
+plt.ylabel('MPG')
+#plt.rcParams['figure.figsize'] = (20,10)
+
+plt.show((30,20))
